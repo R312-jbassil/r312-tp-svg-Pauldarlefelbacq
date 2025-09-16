@@ -1,0 +1,77 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+	<div class="container mx-auto p-6 max-w-7xl">
+		<h1 class="text-2xl font-bold mb-8 text-center">Générateur SVG</h1>
+		
+		<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+			<!-- Section Input -->
+			<div class="card bg-base-100 shadow-md">
+				<div class="card-body">
+					<h2 class="card-title text-lg">Prompt</h2>
+					<textarea 
+						class="textarea textarea-bordered w-full h-32 resize-none" 
+						placeholder="Décrivez le SVG que vous souhaitez générer..."
+						id="prompt-input"
+					></textarea>
+					<div class="card-actions justify-end mt-4">
+						<button class="btn btn-primary" id="generate-btn">
+							Générer
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="card bg-base-100 shadow-md">
+				<div class="card-body">
+					<h2 class="card-title text-lg">Code SVG</h2>
+					<div class="mockup-code h-64 overflow-y-auto">
+						<pre id="generated-code" class="text-sm"><code>Le code SVG apparaîtra ici...</code></pre>
+					</div>
+				</div>
+			</div>
+
+			<div class="card bg-base-100 shadow-md">
+				<div class="card-body">
+					<h2 class="card-title text-lg">Aperçu</h2>
+					<div class="border border-base-300 rounded-lg h-64 flex items-center justify-center bg-base-50">
+						<div id="svg-preview" class="w-full h-full flex items-center justify-center">
+							<span class="text-base-content/60">L'aperçu SVG apparaîtra ici...</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		// Fonctionnalité basique pour le moment
+		document.getElementById('generate-btn')?.addEventListener('click', function() {
+			const prompt = (document.getElementById('prompt-input') as HTMLTextAreaElement)?.value;
+			
+			if (prompt.trim()) {
+				// Exemple de code SVG simple pour test
+				const exampleSvg = `<svg width="200" height="200" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="100" cy="100" r="50" fill="#3B82F6" />
+  <text x="100" y="105" text-anchor="middle" fill="white" font-size="16">
+    ${prompt.substring(0, 10)}...
+  </text>
+</svg>`;
+				
+				// Afficher le code
+				const codeElement = document.getElementById('generated-code');
+				if (codeElement) {
+					codeElement.textContent = exampleSvg;
+				}
+				
+				// Afficher l'aperçu
+				const previewElement = document.getElementById('svg-preview');
+				if (previewElement) {
+					previewElement.innerHTML = exampleSvg;
+				}
+			}
+		});
+	</script>
+</Layout>
