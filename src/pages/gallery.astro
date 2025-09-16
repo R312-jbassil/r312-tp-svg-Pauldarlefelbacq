@@ -1,0 +1,86 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout>
+	<div class="container mx-auto p-6 max-w-7xl">
+		<div class="flex justify-between items-center mb-8">
+			<h1 class="text-2xl font-bold">SVG Sauvegardés</h1>
+			<a href="/generator" class="btn btn-primary">Nouveau SVG</a>
+		</div>
+		
+		<div id="svg-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+			<div class="flex justify-center items-center">
+				<span class="loading loading-ring loading-xl"></span>
+			</div>
+		</div>
+	</div>
+
+	<script>
+		//@ts-nocheck
+		
+		import('https://cdn.skypack.dev/pocketbase').then(({ default: PocketBase }) => {
+			window.PocketBase = PocketBase;
+			loadSavedSVGs();
+		});
+		
+		async function loadSavedSVGs() {
+			try {
+				if (!window.PocketBase) {
+					showError('PocketBase non chargé');
+					return;
+				}
+				
+				const pb = new window.PocketBase('http://127.0.0.1:8090');
+				
+				const records = await pb.collection('svg').getFullList({
+					sort: '-created',
+				});
+				
+				displaySVGs(records);
+				
+			} catch (error) {
+				console.error('Erreur:', error);
+				showError('Erreur de connexion à PocketBase');
+			}
+		}
+		
+		function displaySVGs(svgs) {
+			const grid = document.getElementById('svg-grid');
+			
+			if (svgs.length === 0) {
+				grid.innerHTML = `
+					<div class="col-span-full text-center py-12">
+						<p class="text-lg text-base-content/60">Aucun SVG sauvegardé</p>
+						<a href="/generator" class="btn btn-primary mt-4">Créer un SVG</a>
+					</div>
+				`;
+				return;
+			}
+			
+			grid.innerHTML = svgs.map(svg => `
+				<div class="card bg-base-100 shadow-md">
+					<div class="card-body">
+						<h2 class="card-title text-lg">${svg.nom}</h2>
+						<div class="border border-base-300 rounded-lg h-48 flex items-center justify-center bg-base-50 overflow-hidden">
+							${svg.svg}
+						</div>
+						<div class="text-xs text-base-content/60 mt-2">
+							Créé le ${new Date(svg.created).toLocaleDateString('fr-FR')}
+						</div>
+					</div>
+				</div>
+			`).join('');
+		}
+		
+		function showError(message) {
+			const grid = document.getElementById('svg-grid');
+			grid.innerHTML = `
+				<div class="col-span-full text-center py-12">
+					<p class="text-lg text-error">${message}</p>
+					<button class="btn btn-outline mt-4" onclick="loadSavedSVGs()">Réessayer</button>
+				</div>
+			`;
+		}
+	</script>
+</Layout>

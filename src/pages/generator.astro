@@ -7,7 +7,6 @@ import Layout from "../layouts/Layout.astro";
 		<h1 class="text-2xl font-bold mb-8 text-center">Générateur SVG</h1>
 		
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-			<!-- Section Input -->
 			<div class="card bg-base-100 shadow-md">
 				<div class="card-body">
 					<h2 class="card-title text-lg">Prompt</h2>
@@ -42,11 +41,26 @@ import Layout from "../layouts/Layout.astro";
 						</div>
 					</div>
 				</div>
+				<div class="mt-4" id="save-section" style="display: none;">
+					<div class="card-actions justify-center mb-4">
+						<input 
+							type="text" 
+							class="input input-bordered w-full max-w-xs" 
+							placeholder="Nom du SVG..."
+							id="svg-name"
+						>
+					</div>
+					<button class="btn btn-success w-full" id="save-button">
+						Sauvegarder SVG
+					</button>
+				</div>
 			</div>
 		</div>
 	</div>
 	<script>
 		//@ts-nocheck
+		
+		let currentSVG = "";
 		
 		async function generateSVG(prompt) {
 			console.log('Generating SVG for prompt:', prompt);
@@ -59,28 +73,90 @@ import Layout from "../layouts/Layout.astro";
 			return data.svg;
 		}
 
+		async function saveSVG(nom, svg) {
+			console.log('Saving SVG with name:', nom);
+			const res = await fetch('/api/saveSVG', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ nom, svg }),
+			});
+			const data = await res.json();
+			return data;
+		}
+
 		async function handleSubmit() {
 			let prompt = "";
 			let svgCode = "";
 			const promptElement = document.getElementById("user-prompt");
 			prompt = promptElement ? promptElement.value : "";
-			console.log('submitted: ', prompt); // message affiché sur votre console d'inspecteur dans le navigateur
+			console.log('submitted: ', prompt);
 			const svgContainer = document.getElementById("svg-container");
 			let svgOutput = document.getElementById("svg-output");
+			const saveSection = document.getElementById("save-section");
 			
 			svgContainer.innerHTML = `<span class="loading loading-ring loading-xl"></span>`;
 			generateButton.disabled = true;
 			
 			svgCode = await generateSVG(prompt);
 			console.log('svgCode: ', svgCode);
-			svgOutput.textContent = svgCode;
-			svgContainer.innerHTML = svgCode;
+			
+			if (svgCode && svgCode.trim()) {
+				currentSVG = svgCode;
+				svgOutput.textContent = svgCode;
+				svgContainer.innerHTML = svgCode;
+				saveSection.style.display = "block";
+			} else {
+				svgContainer.innerHTML = `<span class="text-error">Erreur lors de la génération du SVG</span>`;
+				saveSection.style.display = "none";
+			}
+			
 			generateButton.disabled = false;
-
 		}
+
+		async function handleSave() {
+			const nameElement = document.getElementById("svg-name");
+			const name = nameElement ? nameElement.value.trim() : "";
+			
+			if (!name) {
+				alert("Veuillez entrer un nom pour le SVG");
+				return;
+			}
+			
+			if (!currentSVG) {
+				alert("Aucun SVG à sauvegarder");
+				return;
+			}
+			
+			const saveButton = document.getElementById("save-button");
+			saveButton.disabled = true;
+			saveButton.textContent = "Sauvegarde...";
+			
+			try {
+				const result = await saveSVG(name, currentSVG);
+				
+				if (result.success) {
+					alert(`SVG "${name}" sauvegardé avec succès !`);
+					nameElement.value = "";
+				} else {
+					alert(`Erreur lors de la sauvegarde : ${result.error}`);
+				}
+			} catch (error) {
+				console.error('Erreur:', error);
+				alert("Erreur lors de la sauvegarde");
+			} finally {
+				saveButton.disabled = false;
+				saveButton.textContent = "Sauvegarder SVG";
+			}
+		}
+
 		const generateButton = document.getElementById("generate-button");
 		if (generateButton) {
 			generateButton.addEventListener("click", handleSubmit);
+		}
+
+		const saveButton = document.getElementById("save-button");
+		if (saveButton) {
+			saveButton.addEventListener("click", handleSave);
 		}
 	</script>
 </Layout>
