@@ -67,6 +67,10 @@ import Layout from "../layouts/Layout.astro";
 			console.log('submitted: ', prompt); // message affiché sur votre console d'inspecteur dans le navigateur
 			const svgContainer = document.getElementById("svg-container");
 			let svgOutput = document.getElementById("svg-output");
+			
+			svgContainer.innerHTML = `<span class="loading loading-ring loading-xl"></span>`;
+			generateButton.disabled = true;
+			
 			svgCode = await generateSVG(prompt);
 			console.log('svgCode: ', svgCode);
 			svgOutput.textContent = svgCode;
