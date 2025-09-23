@@ -18,11 +18,14 @@ import Layout from "../layouts/Layout.astro";
 
 	<script>
 		//@ts-nocheck
+
 		
 		import('https://cdn.skypack.dev/pocketbase').then(({ default: PocketBase }) => {
 			window.PocketBase = PocketBase;
 			loadSavedSVGs();
 		});
+
+		let promptList = [];
 		
 		async function loadSavedSVGs() {
 			try {
@@ -63,7 +66,7 @@ import Layout from "../layouts/Layout.astro";
 					<div class="card-body">
 						<h2 class="card-title text-lg">${svg.nom}</h2>
 						<div class="border border-base-300 rounded-lg h-48 flex items-center justify-center bg-base-50 overflow-hidden">
-							${svg.svg}
+							${svg.code}
 						</div>
 						<div class="text-xs text-base-content/60 mt-2">
 							Créé le ${new Date(svg.created).toLocaleDateString('fr-FR')}

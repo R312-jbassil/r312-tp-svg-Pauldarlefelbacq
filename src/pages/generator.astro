@@ -19,6 +19,9 @@ import Layout from "../layouts/Layout.astro";
 						<button class="btn btn-primary" id="generate-button">
 							Générer
 						</button>
+						<button class="btn btn-secondary" id="edit-button">
+							Editer
+						</button>
 					</div>
 				</div>
 			</div>
@@ -42,14 +45,6 @@ import Layout from "../layouts/Layout.astro";
 					</div>
 				</div>
 				<div class="mt-4" id="save-section" style="display: none;">
-					<div class="card-actions justify-center mb-4">
-						<input 
-							type="text" 
-							class="input input-bordered w-full max-w-xs" 
-							placeholder="Nom du SVG..."
-							id="svg-name"
-						>
-					</div>
 					<button class="btn btn-success w-full" id="save-button">
 						Sauvegarder SVG
 					</button>
@@ -59,26 +54,35 @@ import Layout from "../layouts/Layout.astro";
 	</div>
 	<script>
 		//@ts-nocheck
-		
+		let promptList = [];
 		let currentSVG = "";
 		
-		async function generateSVG(prompt) {
+		async function generateSVG(prompt, useHistory = false) {
 			console.log('Generating SVG for prompt:', prompt);
+			
+			let requestBody;
+			if (useHistory && promptList.length > 0) {
+				// Envoyer l'historique complet pour les éditions
+				requestBody = { messages: promptList };
+			} else {
+				// Envoyer juste le prompt pour une nouvelle génération
+				requestBody = { prompt };
+			}
+			
 			const res = await fetch('/api/generateSVG', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ prompt }),
+				body: JSON.stringify(requestBody),
 			});
 			const data = await res.json();
 			return data.svg;
 		}
 
-		async function saveSVG(nom, svg) {
-			console.log('Saving SVG with name:', nom);
-			const res = await fetch('/api/saveSVG', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ nom, svg }),
+		async function saveSVG(params) {
+			const res = await fetch("/api/saveSVG", {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(params),
 			});
 			const data = await res.json();
 			return data;
@@ -90,34 +94,104 @@ import Layout from "../layouts/Layout.astro";
 			const promptElement = document.getElementById("user-prompt");
 			prompt = promptElement ? promptElement.value : "";
 			console.log('submitted: ', prompt);
+			promptList.length = 0; 
+    		promptList.push({ role: "user", content: prompt });
 			const svgContainer = document.getElementById("svg-container");
 			let svgOutput = document.getElementById("svg-output");
 			const saveSection = document.getElementById("save-section");
 			
 			svgContainer.innerHTML = `<span class="loading loading-ring loading-xl"></span>`;
 			generateButton.disabled = true;
+			editButton.disabled = true;
 			
 			svgCode = await generateSVG(prompt);
-			console.log('svgCode: ', svgCode);
+			console.log('svgCode reçu: ', svgCode);
+			console.log('type de svgCode: ', typeof svgCode);
+			console.log('svgCode est-il vide? ', !svgCode || !svgCode.trim());
+			
+			if (svgCode && svgCode.trim()) {
+				// Ajouter la réponse de l'IA à l'historique
+				promptList.push({ role: "assistant", content: svgCode });
+				
+				currentSVG = svgCode;
+				console.log('Mise à jour svgOutput avec: ', svgCode.substring(0, 50) + '...');
+				const codeElement = svgOutput.querySelector('code');
+				if (codeElement) {
+					codeElement.textContent = svgCode;
+				} else {
+					svgOutput.innerHTML = `<code>${svgCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+				}
+				svgContainer.innerHTML = svgCode;
+				saveSection.style.display = "block";
+				console.log('svgOutput après mise à jour: ', svgOutput.innerHTML.substring(0, 100) + '...');
+			} else {
+				console.log('SVG vide ou invalide');
+				svgContainer.innerHTML = `<span class="text-error">Erreur lors de la génération du SVG</span>`;
+				saveSection.style.display = "none";
+			}
+			
+			generateButton.disabled = false;
+			editButton.disabled = false;
+		}
+
+		const editButton = document.getElementById("edit-button");
+
+		async function handleEdit() {
+			let prompt = "";
+			let svgCode = "";
+			const promptElement = document.getElementById("user-prompt");
+			prompt = promptElement ? promptElement.value : "";
+			console.log("Prompt soumis : ", prompt);
+			
+			// Ajout du prompt de l'utilisateur à la liste
+			promptList.push({ role: "user", content: prompt });
+			
+			const svgContainer = document.getElementById("svg-container");
+			let svgOutput = document.getElementById("svg-output");
+			
+			// Afficher un spinner de chargement
+			svgContainer.innerHTML = `<span class="loading loading-ring loading-xl"></span>`;
+			generateButton.disabled = true;
+			editButton.disabled = true;
+			
+			// Appeler la fonction pour générer le SVG avec l'historique
+			svgCode = await generateSVG(prompt, true);
+			console.log("Code SVG généré : ", svgCode);
+			
+			// Ajouter la réponse de l'IA à la liste des prompts
+			promptList.push({ role: "assistant", content: svgCode });
 			
 			if (svgCode && svgCode.trim()) {
 				currentSVG = svgCode;
-				svgOutput.textContent = svgCode;
+				const codeElement = svgOutput.querySelector('code');
+				if (codeElement) {
+					codeElement.textContent = svgCode;
+				} else {
+					svgOutput.innerHTML = `<code>${svgCode.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</code>`;
+				}
 				svgContainer.innerHTML = svgCode;
+				const saveSection = document.getElementById("save-section");
 				saveSection.style.display = "block";
 			} else {
 				svgContainer.innerHTML = `<span class="text-error">Erreur lors de la génération du SVG</span>`;
 				saveSection.style.display = "none";
 			}
 			
+			// Réactiver les boutons
 			generateButton.disabled = false;
+			editButton.disabled = false;
+			console.log("Historique des prompts : ", promptList);
 		}
 
+		if (editButton) {
+			editButton.addEventListener("click", handleEdit);
+		}
+
+
 		async function handleSave() {
-			const nameElement = document.getElementById("svg-name");
-			const name = nameElement ? nameElement.value.trim() : "";
+			const name = prompt("Entrez un nom pour le SVG :");
 			
-			if (!name) {
+			if (!name || !name.trim()) {
 				alert("Veuillez entrer un nom pour le SVG");
 				return;
 			}
@@ -127,16 +201,23 @@ import Layout from "../layouts/Layout.astro";
 				return;
 			}
 			
+			console.log("Sauvegarde du SVG : ", JSON.stringify(currentSVG));
+			
 			const saveButton = document.getElementById("save-button");
 			saveButton.disabled = true;
 			saveButton.textContent = "Sauvegarde...";
 			
 			try {
-				const result = await saveSVG(name, currentSVG);
+				const params = {
+					nom: name.trim(),
+					code: currentSVG,
+					chat_history: JSON.stringify(promptList),
+				};
+				
+				const result = await saveSVG(params);
 				
 				if (result.success) {
 					alert(`SVG "${name}" sauvegardé avec succès !`);
-					nameElement.value = "";
 				} else {
 					alert(`Erreur lors de la sauvegarde : ${result.error}`);
 				}
