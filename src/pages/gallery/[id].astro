@@ -1,0 +1,71 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import pb from "../../utils/pb";
+import { Collections, type SvgRecord } from "../../utils/pocketbase-types";
+
+const id = Astro.params.id;
+if (!id) {
+    return Astro.redirect('/gallery');
+}
+const svg: SvgRecord = await pb.collection(Collections.Svg).getOne(id);
+
+// Parse chat_history si c'est une string JSON
+let chatHistory = [];
+if (svg.chat_history) {
+    try {
+        chatHistory = JSON.parse(svg.chat_history);
+    } catch (e) {
+        console.error("Erreur parsing chat_history:", e);
+    }
+}
+---
+<Layout>
+    <div class="container mx-auto p-6 max-w-7xl">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
+            <!-- Section SVG -->
+            <div class="flex flex-col">
+                <h2 class="text-xl font-bold mb-4">{svg.nom}</h2>
+                <div class="border border-base-300 rounded-lg p-4 flex items-center justify-center bg-base-50 flex-grow">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <Fragment set:html={svg.code} />
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider lg:divider-horizontal"></div>
+
+            <!-- Section Chat -->
+            <div class="flex flex-col h-full">
+                <h2 class="text-xl font-bold mb-4">Historique du Chat</h2>
+                
+                <div id="chat-history" class="flex flex-col gap-4 w-full mb-20 overflow-y-auto flex-grow">
+                    {
+                        (Array.isArray(chatHistory) && chatHistory.length > 0) ? (
+                            chatHistory.map((msg: { role: string; content: string; }) => (
+                                <div class={`chat ${msg.role === 'user' ? 'chat-start' : 'chat-end'}`}>
+                                    <div class={`chat-bubble ${msg.role === 'user' ? 'bg-primary text-primary-content' : 'bg-secondary text-secondary-content'}`}>
+                                        <pre>{msg.content}</pre>
+                                    </div>
+                                    <div class="chat-footer opacity-60 text-xs mt-1">{msg.role}</div>
+                                </div>
+                            ))
+                        ) : (
+                            <span class="text-error">Aucun historique de chat.</span>
+                        )
+                    }
+                </div>
+
+                <!-- Zone d'input pour nouveau message -->
+                <div class="flex gap-2 mt-auto">
+                    <input 
+                        type="text" 
+                        placeholder="Tapez votre message..." 
+                        class="input input-bordered flex-grow"
+                        id="chat-input"
+                    >
+                    <button class="btn btn-primary" id="send-btn">Envoyer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

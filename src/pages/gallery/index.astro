@@ -1,5 +1,5 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import Layout from "../../layouts/Layout.astro";
 ---
 
 <Layout>
@@ -62,7 +62,7 @@ import Layout from "../layouts/Layout.astro";
 			}
 			
 			grid.innerHTML = svgs.map(svg => `
-				<div class="card bg-base-100 shadow-md">
+				<a href="/gallery/${svg.id}" class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
 					<div class="card-body">
 						<h2 class="card-title text-lg">${svg.nom}</h2>
 						<div class="border border-base-300 rounded-lg h-48 flex items-center justify-center bg-base-50 overflow-hidden">
@@ -71,8 +71,11 @@ import Layout from "../layouts/Layout.astro";
 						<div class="text-xs text-base-content/60 mt-2">
 							Créé le ${new Date(svg.created).toLocaleDateString('fr-FR')}
 						</div>
+						<div class="card-actions justify-end mt-2">
+							<span class="badge badge-outline">Voir détails</span>
+						</div>
 					</div>
-				</div>
+				</a>
 			`).join('');
 		}
 		

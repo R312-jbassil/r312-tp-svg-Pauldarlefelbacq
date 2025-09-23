@@ -12,6 +12,16 @@ export const Collections = {
  * @property {string} id - Record ID
  * @property {string} nom - Name of the SVG
  * @property {string} code - SVG code content
+ * @property {string} chat_history - Chat history as JSON string
  * @property {string} created - Creation timestamp
  * @property {string} updated - Update timestamp
  */
+
+export interface SvgRecord {
+  id: string;
+  nom: string;
+  code: string;
+  chat_history?: string;
+  created: string;
+  updated: string;
+}
