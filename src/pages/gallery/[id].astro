@@ -35,10 +35,10 @@ if (svg.chat_history) {
             <div class="divider lg:divider-horizontal"></div>
 
             <!-- Section Chat -->
-            <div class="flex flex-col h-full">
+            <div class="flex flex-col h-full relative">
                 <h2 class="text-xl font-bold mb-4">Historique du Chat</h2>
                 
-                <div id="chat-history" class="flex flex-col gap-4 w-full mb-20 overflow-y-auto flex-grow">
+                <div id="chat-history" class="flex flex-col gap-4 w-full pb-20 overflow-y-auto flex-grow">
                     {
                         (Array.isArray(chatHistory) && chatHistory.length > 0) ? (
                             chatHistory.map((msg: { role: string; content: string; }) => (
@@ -55,17 +55,144 @@ if (svg.chat_history) {
                     }
                 </div>
 
-                <!-- Zone d'input pour nouveau message -->
-                <div class="flex gap-2 mt-auto">
-                    <input 
-                        type="text" 
-                        placeholder="Tapez votre message..." 
-                        class="input input-bordered flex-grow"
-                        id="chat-input"
-                    >
-                    <button class="btn btn-primary" id="send-btn">Envoyer</button>
-                </div>
+                <!-- Formulaire de chat -->
+                <form id="input-prompt-form" class="flex flex-col gap-2 w-full absolute bottom-0 left-0 right-0 bg-base-300 p-4" method="POST" autocomplete="off">
+                    <input type="hidden" name="history" id="history-input" value={JSON.stringify(chatHistory)} />
+                    <input type="hidden" name="id" value={svg.id} />
+                    <div class="flex items-center gap-2">
+                        <input id="prompt-input" name="editPrompt" type="text" class="input flex-grow" placeholder="Enter a prompt to edit the SVG..." />
+                        <button class="btn btn-primary" type="submit">Edit</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+
+    <script>
+        //@ts-nocheck
+        const chatForm = document.getElementById('input-prompt-form');
+        const chatHistoryDiv = document.getElementById('chat-history');
+        const historyInput = document.getElementById('history-input');
+        const promptInput = document.getElementById('prompt-input');
+        const svgContainer = document.querySelector('.border.border-base-300.rounded-lg div');
+        
+        let currentHistory = JSON.parse(historyInput.value || '[]');
+
+        // Fonction pour générer le SVG
+        async function generateSVG(messages) {
+            try {
+                const response = await fetch('/api/generateSVG', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ messages })
+                });
+                
+                if (!response.ok) throw new Error('Erreur API');
+                
+                const data = await response.json();
+                return data.svg;
+            } catch (error) {
+                console.error('Erreur génération:', error);
+                return 'Erreur lors de la génération du SVG';
+            }
+        }
+
+        // Fonction pour sauvegarder les modifications
+        async function updateSVG(svgId, code, history) {
+            try {
+                const response = await fetch('/api/updateSVG', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        id: svgId, 
+                        code, 
+                        chat_history: JSON.stringify(history) 
+                    })
+                });
+                
+                if (!response.ok) throw new Error('Erreur sauvegarde');
+            } catch (error) {
+                console.error('Erreur sauvegarde:', error);
+            }
+        }
+
+        // Fonction pour ajouter un message au chat
+        function addChatMessage(role, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat ${role === 'user' ? 'chat-start' : 'chat-end'}`;
+            messageDiv.innerHTML = `
+                <div class="chat-bubble ${role === 'user' ? 'bg-primary text-primary-content' : 'bg-secondary text-secondary-content'}">
+                    <pre>${content}</pre>
+                </div>
+                <div class="chat-footer opacity-60 text-xs mt-1">${role}</div>
+            `;
+            chatHistoryDiv.appendChild(messageDiv);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+        }
+
+        // Écouteur d'événement pour le formulaire
+        chatForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(chatForm);
+            const promptText = formData.get('editPrompt')?.toString().trim();
+            const svgId = formData.get('id')?.toString();
+            
+            if (!promptText) return;
+
+            // Ajouter le message utilisateur à l'historique
+            const userMessage = { role: 'user', content: promptText };
+            currentHistory.push(userMessage);
+            
+            // Afficher le message utilisateur
+            addChatMessage('user', promptText);
+            
+            // Réinitialiser le champ
+            promptInput.value = '';
+            
+            // Afficher un indicateur de chargement
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'chat chat-end';
+            loadingDiv.innerHTML = `
+                <div class="chat-bubble">
+                    <span class="loading loading-dots loading-sm"></span>
+                </div>
+            `;
+            chatHistoryDiv.appendChild(loadingDiv);
+            chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
+
+            try {
+                // Générer la réponse IA
+                const aiResponse = await generateSVG(currentHistory);
+                
+                // Supprimer l'indicateur de chargement
+                loadingDiv.remove();
+                
+                // Ajouter la réponse IA à l'historique
+                const assistantMessage = { role: 'assistant', content: aiResponse };
+                currentHistory.push(assistantMessage);
+                
+                // Afficher la réponse IA
+                addChatMessage('assistant', aiResponse);
+                
+                // Extraire et mettre à jour le SVG
+                const svgMatch = aiResponse.match(/<svg[\s\S]*?<\/svg>/i);
+                if (svgMatch && svgContainer) {
+                    const newSvgCode = svgMatch[0];
+                    svgContainer.innerHTML = newSvgCode;
+                    
+                    // Sauvegarder les modifications
+                    await updateSVG(svgId, newSvgCode, currentHistory);
+                }
+                
+                // Mettre à jour l'input caché
+                historyInput.value = JSON.stringify(currentHistory);
+                
+            } catch (error) {
+                // Supprimer l'indicateur de chargement en cas d'erreur
+                loadingDiv.remove();
+                addChatMessage('assistant', 'Erreur lors de la génération du SVG');
+            }
+        });
+    </script>
 </Layout>
