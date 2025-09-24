@@ -97,23 +97,14 @@ if (svg.chat_history) {
             }
         }
 
-        // Fonction pour sauvegarder les modifications
-        async function updateSVG(svgId, code, history) {
-            try {
-                const response = await fetch('/api/updateSVG', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        id: svgId, 
-                        code, 
-                        chat_history: JSON.stringify(history) 
-                    })
-                });
-                
-                if (!response.ok) throw new Error('Erreur sauvegarde');
-            } catch (error) {
-                console.error('Erreur sauvegarde:', error);
-            }
+        // Fonction pour mettre à jour les données
+        async function update(updatedData) {
+            const response = await fetch("/api/updateSVG", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedData),
+            });
+            return response;
         }
 
         // Fonction pour ajouter un message au chat
@@ -182,7 +173,19 @@ if (svg.chat_history) {
                     svgContainer.innerHTML = newSvgCode;
                     
                     // Sauvegarder les modifications
-                    await updateSVG(svgId, newSvgCode, currentHistory);
+                    const response = await update({
+                        id: svgId,
+                        code: newSvgCode,
+                        chat_history: JSON.stringify(currentHistory),
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        console.log("SVG updated successfully");
+                    } else {
+                        console.error("Failed to update SVG:", data.error);
+                        alert("Failed to update SVG");
+                    }
                 }
                 
                 // Mettre à jour l'input caché

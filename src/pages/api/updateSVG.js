@@ -1,40 +1,34 @@
-import pb from '../../utils/pb.js';
-import { Collections } from '../../utils/pocketbase-types.js';
+import pb from "../../utils/pb";
+import { Collections } from "../../utils/pocketbase-types";
 
 export async function POST({ request }) {
-    try {
-        const { id, code, chat_history } = await request.json();
-
-        if (!id || !code) {
-            return new Response(JSON.stringify({ 
-                error: 'ID et code SVG requis' 
-            }), {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' }
-            });
-        }
-
-        // Mettre à jour l'enregistrement dans PocketBase
-        const record = await pb.collection(Collections.Svg).update(id, {
-            code,
-            chat_history
-        });
-
-        return new Response(JSON.stringify({ 
-            success: true,
-            record 
-        }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
-
-    } catch (error) {
-        console.error('Erreur lors de la mise à jour:', error);
-        return new Response(JSON.stringify({ 
-            error: 'Erreur serveur lors de la mise à jour' 
-        }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' }
-        });
+  const data = await request.json();
+  console.log("Received data to update:", data);
+  
+  try {
+    const { id, ...updateData } = data;
+    
+    if (!id) {
+      return new Response(JSON.stringify({ success: false, error: "ID is required" }), {
+        headers: { "Content-Type": "application/json" },
+        status: 400,
+      });
     }
+
+    const record = await pb
+      .collection(Collections.Svg)
+      .update(id, updateData);
+    
+    console.log("SVG updated with ID:", record.id);
+
+    return new Response(JSON.stringify({ success: true, record }), {
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    console.error("Error updating SVG:", error);
+    return new Response(JSON.stringify({ success: false, error: error.message }), {
+      headers: { "Content-Type": "application/json" },
+      status: 500,
+    });
+  }
 }
