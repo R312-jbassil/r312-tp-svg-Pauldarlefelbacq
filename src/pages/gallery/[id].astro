@@ -21,6 +21,15 @@ if (svg.chat_history) {
 ---
 <Layout>
     <div class="container mx-auto p-6 max-w-7xl">
+        <!-- Breadcrumb de navigation -->
+        <div class="text-sm breadcrumbs mb-6">
+            <ul>
+                <li><a href="/" class="text-primary hover:text-primary-focus">Accueil</a></li>
+                <li><a href="/gallery" class="text-primary hover:text-primary-focus">Galerie</a></li>
+                <li class="text-base-content/60">{svg.nom}</li>
+            </ul>
+        </div>
+        
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
             <!-- Section SVG -->
             <div class="flex flex-col">

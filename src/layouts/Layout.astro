@@ -12,6 +12,31 @@ import "../styles/global.css";
 	</head>
 	<body class="h-full">
 		<div class="h-full flex flex-col min-h-0">
+			<!-- Header de navigation -->
+			<header class="bg-base-100 shadow-sm border-b border-base-300">
+				<div class="container mx-auto px-6 py-4">
+					<nav class="flex items-center justify-between">
+						<div class="flex items-center space-x-4">
+							<a href="/" class="text-xl font-bold text-primary hover:text-primary-focus transition-colors">
+								SVG Generator
+							</a>
+						</div>
+						<div class="flex items-center space-x-4">
+							<a href="/" class="btn btn-ghost btn-sm">
+								Accueil
+							</a>
+							<a href="/generator" class="btn btn-ghost btn-sm">
+								Générateur
+							</a>
+							<a href="/gallery" class="btn btn-ghost btn-sm">
+								Galerie
+							</a>
+						</div>
+					</nav>
+				</div>
+			</header>
+			
+			<!-- Contenu principal -->
 			<div class="flex-1 min-h-0">
 				<slot />
 			</div>
