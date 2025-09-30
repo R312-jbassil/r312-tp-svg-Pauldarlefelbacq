@@ -1,12 +1,16 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import { ui } from "../../i18n/ui";
+
+const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
+console.log('Locale in index:', locale);
 ---
 
 <Layout>
 	<div class="container mx-auto p-6 max-w-7xl">
 		<div class="flex justify-between items-center mb-8">
-			<h1 class="text-2xl font-bold">SVG Sauvegardés</h1>
-			<a href="/generator" class="btn btn-primary">Nouveau SVG</a>
+			<h1 class="text-2xl font-bold">{ui[locale].gallery.title}</h1>
+			<a href="/generator" class="btn btn-primary">{ui[locale].gallery.generatebutton}</a>
 		</div>
 		
 		<div id="svg-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

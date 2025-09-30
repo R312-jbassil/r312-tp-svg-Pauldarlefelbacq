@@ -2,6 +2,9 @@
 import Layout from "../../layouts/Layout.astro";
 import pb from "../../utils/pb";
 import { Collections, type SvgRecord } from "../../utils/pocketbase-types";
+import { ui } from "../../i18n/ui";
+const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
+console.log('Locale in index:', locale);
 
 const id = Astro.params.id;
 if (!id) {
@@ -24,8 +27,8 @@ if (svg.chat_history) {
         <!-- Breadcrumb de navigation -->
         <div class="text-sm breadcrumbs mb-6">
             <ul>
-                <li><a href="/" class="text-primary hover:text-primary-focus">Accueil</a></li>
-                <li><a href="/gallery" class="text-primary hover:text-primary-focus">Galerie</a></li>
+                <li><a href="/" class="text-primary hover:text-primary-focus">{ui[locale].nav.home}</a></li>
+                <li><a href="/gallery" class="text-primary hover:text-primary-focus">{ui[locale].nav.gallery}</a></li>
                 <li class="text-base-content/60">{svg.nom}</li>
             </ul>
         </div>
@@ -45,8 +48,8 @@ if (svg.chat_history) {
 
             <!-- Section Chat -->
             <div class="flex flex-col h-full relative">
-                <h2 class="text-xl font-bold mb-4">Historique du Chat</h2>
-                
+                <h2 class="text-xl font-bold mb-4">{ui[locale].id.chathistory}</h2>
+
                 <div id="chat-history" class="flex flex-col gap-4 w-full pb-20 overflow-y-auto flex-grow">
                     {
                         (Array.isArray(chatHistory) && chatHistory.length > 0) ? (
@@ -59,7 +62,7 @@ if (svg.chat_history) {
                                 </div>
                             ))
                         ) : (
-                            <span class="text-error">Aucun historique de chat.</span>
+                            <span class="text-error">{ui[locale].id.chaterror}</span>
                         )
                     }
                 </div>
@@ -69,8 +72,8 @@ if (svg.chat_history) {
                     <input type="hidden" name="history" id="history-input" value={JSON.stringify(chatHistory)} />
                     <input type="hidden" name="id" value={svg.id} />
                     <div class="flex items-center gap-2">
-                        <input id="prompt-input" name="editPrompt" type="text" class="input flex-grow" placeholder="Enter a prompt to edit the SVG..." />
-                        <button class="btn btn-primary" type="submit">Edit</button>
+                        <input id="prompt-input" name="editPrompt" type="text" class="input flex-grow" placeholder={ui[locale].id.enterprompt} />
+                        <button class="btn btn-primary" type="submit">{ui[locale].id.edit}</button>
                     </div>
                 </form>
             </div>

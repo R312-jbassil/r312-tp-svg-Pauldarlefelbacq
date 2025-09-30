@@ -1,5 +1,9 @@
 ---
 import "../styles/global.css";
+import {ui}  from "../i18n/ui.js";
+
+const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
+console.log('Locale in index:', locale);
 ---
 <!doctype html>
 <html lang="en" data-theme="light" class="h-full">
@@ -12,7 +16,6 @@ import "../styles/global.css";
 	</head>
 	<body class="h-full">
 		<div class="h-full flex flex-col min-h-0">
-			<!-- Header de navigation -->
 			<header class="bg-base-100 shadow-sm border-b border-base-300">
 				<div class="container mx-auto px-6 py-4">
 					<nav class="flex items-center justify-between">
@@ -21,15 +24,23 @@ import "../styles/global.css";
 								SVG Generator
 							</a>
 						</div>
+						<form method="POST" action={Astro.url.pathname}>
+							<select name="language" class="select" onchange="this.form.submit()">
+								<option disabled selected="true">{ui[locale].nav.language}</option>
+								<option value="en" >English</option>
+								<option value="fr" >Français</option>
+							</select>
+						</form>
+
 						<div class="flex items-center space-x-4">
 							<a href="/" class="btn btn-ghost btn-sm">
-								Accueil
+								{ui[locale].nav.home}
 							</a>
 							<a href="/generator" class="btn btn-ghost btn-sm">
-								Générateur
+								{ui[locale].nav.generator}
 							</a>
 							<a href="/gallery" class="btn btn-ghost btn-sm">
-								Galerie
+								{ui[locale].nav.gallery}
 							</a>
 						</div>
 					</nav>

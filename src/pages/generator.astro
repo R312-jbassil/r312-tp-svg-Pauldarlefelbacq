@@ -1,26 +1,30 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { ui } from "../i18n/ui";
+
+const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
+console.log('Locale in index:', locale);
 ---
 
 <Layout>
 	<div class="container mx-auto p-6 max-w-7xl">
-		<h1 class="text-2xl font-bold mb-8 text-center">Générateur SVG</h1>
+		<h1 class="text-2xl font-bold mb-8 text-center">{ui[locale].generator.title}</h1>
 		
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
 			<div class="card bg-base-100 shadow-md">
 				<div class="card-body">
-					<h2 class="card-title text-lg">Prompt</h2>
+					<h2 class="card-title text-lg">{ui[locale].generator.promptLabel}</h2>
 					<textarea 
 						class="textarea textarea-bordered w-full h-32 resize-none" 
-						placeholder="Décrivez le SVG que vous souhaitez générer..."
+						placeholder={ui[locale].generator.contentPlaceholder}
 						id="user-prompt"
 					></textarea>
 					<div class="card-actions justify-end mt-4">
 						<button class="btn btn-primary" id="generate-button">
-							Générer
+							{ui[locale].generator.generateButton}
 						</button>
 						<button class="btn btn-secondary" id="edit-button">
-							Editer
+							{ui[locale].generator.editButton}
 						</button>
 					</div>
 				</div>
@@ -28,25 +32,25 @@ import Layout from "../layouts/Layout.astro";
 
 			<div class="card bg-base-100 shadow-md">
 				<div class="card-body">
-					<h2 class="card-title text-lg">Code SVG</h2>
+					<h2 class="card-title text-lg">{ui[locale].generator.codePlaceholder}</h2>
 					<div class="mockup-code h-64 overflow-y-auto">
-						<pre id="svg-output" class="text-sm"><code>Le code SVG apparaîtra ici...</code></pre>
+						<pre id="svg-output" class="text-sm"><code>{ui[locale].generator.codePlaceholder}</code></pre>
 					</div>
 				</div>
 			</div>
 
 			<div class="card bg-base-100 shadow-md">
 				<div class="card-body">
-					<h2 class="card-title text-lg">Aperçu</h2>
+					<h2 class="card-title text-lg">{ui[locale].generator.previewLabel}</h2>
 					<div class="border border-base-300 rounded-lg h-64 flex items-center justify-center bg-base-50">
 						<div id="svg-container" class="w-full h-full flex items-center justify-center">
-							<span class="text-base-content/60">L'aperçu SVG apparaîtra ici...</span>
+							<span class="text-base-content/60">{ui[locale].generator.previewPlaceholder}</span>
 						</div>
 					</div>
 				</div>
 				<div class="mt-4" id="save-section" style="display: none;">
 					<button class="btn btn-success w-full" id="save-button">
-						Sauvegarder SVG
+						{ui[locale].generator.saveButton}
 					</button>
 				</div>
 			</div>
