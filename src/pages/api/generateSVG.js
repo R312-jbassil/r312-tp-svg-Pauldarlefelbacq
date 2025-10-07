@@ -74,9 +74,7 @@ export const POST = async ({ request }) => {
             content: "You are an SVG code generator. Generate SVG code for the following messages. Make sure to include ids for each part of the generated SVG. Only return the SVG code, nothing else."
         };
         
-        // Préparer les messages finaux
-        // IMPORTANT: Certains modèles HuggingFace ne supportent qu'un seul message user
-        // On va donc condenser toute la conversation en un seul prompt
+        
         let finalMessages;
         
         if (messages.length === 1) {
