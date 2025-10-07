@@ -1,0 +1,263 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { ui } from "../i18n/ui";
+
+const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
+const user = Astro.locals.user;
+
+// Redirect if not authenticated
+if (!user) {
+    return Astro.redirect('/login');
+}
+---
+
+<Layout>
+    <div class="container mx-auto p-6 max-w-4xl">
+        <h1 class="text-3xl font-bold mb-8">{ui[locale].profile.title}</h1>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Profile Info Card -->
+            <div class="lg:col-span-1">
+                <div class="card bg-base-100 shadow-xl">
+                    <div class="card-body items-center text-center">
+                        <!-- Avatar Display -->
+                        <div class="avatar mb-4">
+                            <div class="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                {user.avatar ? (
+                                    <img 
+                                        id="avatar-preview" 
+                                        src={`${import.meta.env.POCKETBASE_URL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`} 
+                                        alt="Profile" 
+                                    />
+                                ) : (
+                                    <div class="bg-neutral text-neutral-content flex items-center justify-center w-full h-full">
+                                        <span class="text-5xl">{user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        
+                        <h2 class="card-title text-xl">{user.name || user.email}</h2>
+                        <p class="text-sm opacity-70">{user.email}</p>
+                        
+                        <div class="divider"></div>
+                        
+                        <button id="edit-mode-btn" class="btn btn-primary w-full">
+                            {ui[locale].profile.editProfile}
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Profile Details/Edit Form -->
+            <div class="lg:col-span-2">
+                <!-- View Mode -->
+                <div id="view-mode" class="card bg-base-100 shadow-xl">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Profile Information</h3>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="label">
+                                    <span class="label-text font-semibold">{ui[locale].profile.name}</span>
+                                </label>
+                                <p class="text-lg">{user.name || '-'}</p>
+                            </div>
+                            
+                            <div>
+                                <label class="label">
+                                    <span class="label-text font-semibold">{ui[locale].profile.email}</span>
+                                </label>
+                                <p class="text-lg">{user.email}</p>
+                            </div>
+                            
+                            <div>
+                                <label class="label">
+                                    <span class="label-text font-semibold">Username</span>
+                                </label>
+                                <p class="text-lg">{user.username}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Edit Mode -->
+                <div id="edit-mode" class="card bg-base-100 shadow-xl hidden">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">{ui[locale].profile.editProfile}</h3>
+                        
+                        <form id="profile-form" class="space-y-4">
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">{ui[locale].profile.name}</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    name="name" 
+                                    value={user.name || ''}
+                                    class="input input-bordered w-full" 
+                                />
+                            </div>
+                            
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">{ui[locale].profile.email}</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    name="email" 
+                                    value={user.email}
+                                    class="input input-bordered w-full" 
+                                    required
+                                />
+                            </div>
+                            
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">{ui[locale].profile.avatar}</span>
+                                </label>
+                                <input 
+                                    type="file" 
+                                    name="avatar" 
+                                    accept="image/*"
+                                    class="file-input file-input-bordered w-full" 
+                                    id="avatar-input"
+                                />
+                            </div>
+                            
+                            <div class="divider">Change Password (Optional)</div>
+                            
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">{ui[locale].profile.currentPassword}</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    name="oldPassword" 
+                                    class="input input-bordered w-full" 
+                                    placeholder="Leave blank to keep current password"
+                                />
+                            </div>
+                            
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">{ui[locale].profile.newPassword}</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    name="password" 
+                                    class="input input-bordered w-full" 
+                                />
+                            </div>
+                            
+                            <div class="form-control">
+                                <label class="label">
+                                    <span class="label-text">{ui[locale].profile.confirmPassword}</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    name="passwordConfirm" 
+                                    class="input input-bordered w-full" 
+                                />
+                            </div>
+                            
+                            <p id="status" class="text-center"></p>
+                            
+                            <div class="card-actions justify-end gap-2">
+                                <button type="button" id="cancel-btn" class="btn btn-ghost">
+                                    {ui[locale].profile.cancel}
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    {ui[locale].profile.saveChanges}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        //@ts-nocheck
+        const editModeBtn = document.getElementById('edit-mode-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const viewMode = document.getElementById('view-mode');
+        const editMode = document.getElementById('edit-mode');
+        const profileForm = document.getElementById('profile-form');
+        const status = document.getElementById('status');
+        const avatarInput = document.getElementById('avatar-input');
+        const avatarPreview = document.getElementById('avatar-preview');
+        
+        // Toggle edit mode
+        editModeBtn?.addEventListener('click', () => {
+            viewMode?.classList.add('hidden');
+            editMode?.classList.remove('hidden');
+        });
+        
+        cancelBtn?.addEventListener('click', () => {
+            editMode?.classList.add('hidden');
+            viewMode?.classList.remove('hidden');
+            profileForm?.reset();
+            status.textContent = '';
+        });
+        
+        // Preview avatar before upload
+        avatarInput?.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (file && avatarPreview) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    avatarPreview.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Handle form submission
+        profileForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            status.className = 'text-center';
+            status.textContent = '';
+            
+            const formData = new FormData(profileForm);
+            const password = formData.get('password');
+            const passwordConfirm = formData.get('passwordConfirm');
+            
+            // Validate passwords match if trying to change
+            if (password || passwordConfirm) {
+                if (password !== passwordConfirm) {
+                    status.className = 'text-center text-error';
+                    status.textContent = '❌ Passwords do not match';
+                    return;
+                }
+            }
+            
+            // Send update request
+            try {
+                const res = await fetch('/api/updateProfile', {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok && data.success) {
+                    status.className = 'text-center text-success';
+                    status.textContent = '✅ Profile updated successfully!';
+                    
+                    // Refresh page after a delay to show updated info
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    status.className = 'text-center text-error';
+                    status.textContent = `❌ ${data.message || 'Error updating profile'}`;
+                }
+            } catch (error) {
+                status.className = 'text-center text-error';
+                status.textContent = '❌ Error updating profile';
+            }
+        });
+    </script>
+</Layout>

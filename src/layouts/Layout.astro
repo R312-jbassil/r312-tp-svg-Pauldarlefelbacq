@@ -3,7 +3,9 @@ import "../styles/global.css";
 import {ui}  from "../i18n/ui.js";
 
 const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
-console.log('Locale in index:', locale);
+const user = Astro.locals.user;
+console.log('Locale in layout:', locale);
+console.log('User in layout:', user);
 ---
 <!doctype html>
 <html lang="en" data-theme="light" class="h-full">
@@ -23,21 +25,8 @@ console.log('Locale in index:', locale);
 							<a href="/" class="text-xl font-bold text-primary hover:text-primary-focus transition-colors">
 								SVG Generator
 							</a>
-							<a href="/login" class="btn btn-ghost btn-sm">
-								Se connecter
-							</a>
-							<form method="POST" action="/api/logout" class="m-0 p-0 ml-4">
-								<button type="submit" class="btn btn-primary">Logout</button>
-							</form>
 						</div>
-						<form method="POST" action={Astro.url.pathname}>
-							<select name="language" class="select" onchange="this.form.submit()">
-								<option disabled selected="true">{ui[locale].nav.language}</option>
-								<option value="en" >English</option>
-								<option value="fr" >Français</option>
-							</select>
-						</form>
-
+						
 						<div class="flex items-center space-x-4">
 							<a href="/" class="btn btn-ghost btn-sm">
 								{ui[locale].nav.home}
@@ -48,6 +37,49 @@ console.log('Locale in index:', locale);
 							<a href="/gallery" class="btn btn-ghost btn-sm">
 								{ui[locale].nav.gallery}
 							</a>
+						</div>
+
+						<div class="flex items-center space-x-4">
+							<!-- Language Selector -->
+							<form method="POST" action={Astro.url.pathname}>
+								<select name="language" class="select select-sm select-bordered" onchange="this.form.submit()">
+									<option disabled selected="true">{ui[locale].nav.language}</option>
+									<option value="en">English</option>
+									<option value="fr">Français</option>
+								</select>
+							</form>
+
+							<!-- Profile Dropdown -->
+							{user ? (
+								<div class="dropdown dropdown-end">
+									<label tabindex="0" class="btn btn-ghost btn-circle avatar">
+										<div class="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+											{user.avatar ? (
+												<img src={`${import.meta.env.POCKETBASE_URL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`} alt="Profile" />
+											) : (
+												<div class="bg-neutral text-neutral-content flex items-center justify-center w-full h-full">
+													<span class="text-xl">{user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}</span>
+												</div>
+											)}
+										</div>
+									</label>
+									<ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+										<li class="menu-title">
+											<span>{user.name || user.email}</span>
+										</li>
+										<li><a href="/profile">{ui[locale].nav.profile || 'Profile'}</a></li>
+										<li>
+											<form method="POST" action="/api/logout" class="w-full">
+												<button type="submit" class="w-full text-left">{ui[locale].nav.logout || 'Logout'}</button>
+											</form>
+										</li>
+									</ul>
+								</div>
+							) : (
+								<a href="/login" class="btn btn-primary btn-sm">
+									{ui[locale].nav.login || 'Login'}
+								</a>
+							)}
 						</div>
 					</nav>
 				</div>

@@ -14,9 +14,15 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
                 <form id="signup-form" class="flex flex-col gap-4">
                     <input 
                         type="text" 
-                        name="username" 
+                        name="name" 
                         placeholder={ui[locale].signup.username}
                         class="input input-bordered" 
+                    />
+                    <input 
+                    type="file"
+                    name="avatar"
+                    accept="image/*"
+                    class="input input-bordered"
                     />
                     <input 
                         type="email" 
@@ -86,13 +92,7 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
         // Envoi des informations au serveur via l'API /api/signup
         const res = await fetch("/api/signup", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                username: formData.get("username") || "",
-                email: formData.get("email"),
-                password: password,
-                passwordConfirm: passwordConfirm,
-            }),
+            body: formData, // Envoi du FormData directement (pas de JSON)
         });
 
         // Traitement de la réponse

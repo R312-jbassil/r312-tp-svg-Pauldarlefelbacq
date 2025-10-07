@@ -2,8 +2,14 @@ import pb from "../../utils/pb";
 
 export const POST = async ({ request }) => {
     try {
-        // Récupère les données envoyées dans la requête
-        const { username, email, password, passwordConfirm } = await request.json();
+        // Récupère les données envoyées dans la requête (FormData pour supporter les fichiers)
+        const formData = await request.formData();
+        
+        const name = formData.get('name');
+        const email = formData.get('email');
+        const password = formData.get('password');
+        const passwordConfirm = formData.get('passwordConfirm');
+        const avatar = formData.get('avatar');
 
         // Validation basique
         if (!email || !password || !passwordConfirm) {
@@ -32,14 +38,24 @@ export const POST = async ({ request }) => {
             );
         }
 
-        // Crée un nouvel utilisateur dans PocketBase
-        const data = {
-            username: username || email.split('@')[0], // Utilise l'email comme username si non fourni
-            email: email,
-            password: password,
-            passwordConfirm: passwordConfirm,
-        };
+        // Prépare les données pour PocketBase
+        const data = new FormData();
+        data.append('username', email.split('@')[0]); // Username basé sur l'email
+        data.append('email', email);
+        data.append('password', password);
+        data.append('passwordConfirm', passwordConfirm);
+        
+        // Ajouter le nom si fourni
+        if (name) {
+            data.append('name', name);
+        }
+        
+        // Ajouter l'avatar si fourni
+        if (avatar && avatar.size > 0) {
+            data.append('avatar', avatar);
+        }
 
+        // Crée un nouvel utilisateur dans PocketBase
         const record = await pb.collection('users').create(data);
 
         console.log("Nouvel utilisateur créé:", record.id);
