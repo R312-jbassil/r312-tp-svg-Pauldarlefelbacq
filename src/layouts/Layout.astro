@@ -23,6 +23,12 @@ console.log('Locale in index:', locale);
 							<a href="/" class="text-xl font-bold text-primary hover:text-primary-focus transition-colors">
 								SVG Generator
 							</a>
+							<a href="/login" class="btn btn-ghost btn-sm">
+								Se connecter
+							</a>
+							<form method="POST" action="/api/logout" class="m-0 p-0 ml-4">
+								<button type="submit" class="btn btn-primary">Logout</button>
+							</form>
 						</div>
 						<form method="POST" action={Astro.url.pathname}>
 							<select name="language" class="select" onchange="this.form.submit()">
