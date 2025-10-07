@@ -58,6 +58,7 @@ console.log('Locale in index:', locale);
 	</div>
 	<script>
 		//@ts-nocheck
+		const user = JSON.parse(localStorage.getItem("user"));
 		let promptList = [];
 		let currentSVG = "";
 		
@@ -192,47 +193,7 @@ console.log('Locale in index:', locale);
 		}
 
 
-		async function handleSave() {
-			const name = prompt("Entrez un nom pour le SVG :");
-			
-			if (!name || !name.trim()) {
-				alert("Veuillez entrer un nom pour le SVG");
-				return;
-			}
-			
-			if (!currentSVG) {
-				alert("Aucun SVG à sauvegarder");
-				return;
-			}
-			
-			console.log("Sauvegarde du SVG : ", JSON.stringify(currentSVG));
-			
-			const saveButton = document.getElementById("save-button");
-			saveButton.disabled = true;
-			saveButton.textContent = "Sauvegarde...";
-			
-			try {
-				const params = {
-					nom: name.trim(),
-					code: currentSVG,
-					chat_history: JSON.stringify(promptList),
-				};
-				
-				const result = await saveSVG(params);
-				
-				if (result.success) {
-					alert(`SVG "${name}" sauvegardé avec succès !`);
-				} else {
-					alert(`Erreur lors de la sauvegarde : ${result.error}`);
-				}
-			} catch (error) {
-				console.error('Erreur:', error);
-				alert("Erreur lors de la sauvegarde");
-			} finally {
-				saveButton.disabled = false;
-				saveButton.textContent = "Sauvegarder SVG";
-			}
-		}
+
 
 		const generateButton = document.getElementById("generate-button");
 		if (generateButton) {
@@ -241,7 +202,19 @@ console.log('Locale in index:', locale);
 
 		const saveButton = document.getElementById("save-button");
 		if (saveButton) {
-			saveButton.addEventListener("click", handleSave);
+			saveButton.addEventListener("click", async () => {
+				const name = prompt("Enter a name for the SVG:");
+				const svgOutput = document.getElementById("svg-output")?.textContent;
+				console.log("Saving SVG: ", JSON.stringify(svgOutput));
+				
+				const params = {
+					nom: name,
+					code: svgOutput || "<svg></svg>",
+					chat_history: JSON.stringify(promptList),
+					user: user.id
+				};
+				await saveSVG(params);
+			});
 		}
 	</script>
 </Layout>

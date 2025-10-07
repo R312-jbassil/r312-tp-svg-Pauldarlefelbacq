@@ -1,9 +1,19 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { ui } from "../../i18n/ui";
+import pb from "../../utils/pb";
+import { Collections } from "../../utils/pocketbase-types";
 
 const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
 console.log('Locale in index:', locale);
+
+const user = Astro.locals.user; // Récupère l'utilisateur connecté
+const svgList = await pb
+    .collection(Collections.Svg)
+    .getFullList({
+        sort: "-created", // Trie les SVGs du plus récent au plus ancien
+        filter: user ? `user = "${user.id}"` : "", // Filtre pour n'afficher que les SVGs de l'utilisateur
+    });
 ---
 
 <Layout>
@@ -14,83 +24,29 @@ console.log('Locale in index:', locale);
 		</div>
 		
 		<div id="svg-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-			<div class="flex justify-center items-center">
-				<span class="loading loading-ring loading-xl"></span>
-			</div>
+			{svgList.length === 0 ? (
+				<div class="col-span-full text-center py-12">
+					<p class="text-lg text-base-content/60">{ui[locale].gallery.noSVG || "Aucun SVG sauvegardé"}</p>
+					<a href="/generator" class="btn btn-primary mt-4">{ui[locale].gallery.createSVG || "Créer un SVG"}</a>
+				</div>
+			) : (
+				svgList.map((svg: any) => (
+					<a href={`/gallery/${svg.id}`} class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
+						<div class="card-body">
+							<h2 class="card-title text-lg">{svg.nom}</h2>
+							<div class="border border-base-300 rounded-lg h-48 flex items-center justify-center bg-base-50 overflow-hidden">
+								<Fragment set:html={svg.code} />
+							</div>
+							<div class="text-xs text-base-content/60 mt-2">
+								{ui[locale].gallery.createdOn || "Créé le"} {new Date(svg.created).toLocaleDateString(locale === 'fr' ? 'fr-FR' : 'en-US')}
+							</div>
+							<div class="card-actions justify-end mt-2">
+								<span class="badge badge-outline">{ui[locale].gallery.viewDetails}</span>
+							</div>
+						</div>
+					</a>
+				))
+			)}
 		</div>
 	</div>
-
-	<script>
-		//@ts-nocheck
-
-		
-		import('https://cdn.skypack.dev/pocketbase').then(({ default: PocketBase }) => {
-			window.PocketBase = PocketBase;
-			loadSavedSVGs();
-		});
-
-		let promptList = [];
-		
-		async function loadSavedSVGs() {
-			try {
-				if (!window.PocketBase) {
-					showError('PocketBase non chargé');
-					return;
-				}
-				
-				const pb = new window.PocketBase('http://127.0.0.1:8090');
-				
-				const records = await pb.collection('svg').getFullList({
-					sort: '-created',
-				});
-				
-				displaySVGs(records);
-				
-			} catch (error) {
-				console.error('Erreur:', error);
-				showError('Erreur de connexion à PocketBase');
-			}
-		}
-		
-		function displaySVGs(svgs) {
-			const grid = document.getElementById('svg-grid');
-			
-			if (svgs.length === 0) {
-				grid.innerHTML = `
-					<div class="col-span-full text-center py-12">
-						<p class="text-lg text-base-content/60">Aucun SVG sauvegardé</p>
-						<a href="/generator" class="btn btn-primary mt-4">Créer un SVG</a>
-					</div>
-				`;
-				return;
-			}
-			
-			grid.innerHTML = svgs.map(svg => `
-				<a href="/gallery/${svg.id}" class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer">
-					<div class="card-body">
-						<h2 class="card-title text-lg">${svg.nom}</h2>
-						<div class="border border-base-300 rounded-lg h-48 flex items-center justify-center bg-base-50 overflow-hidden">
-							${svg.code}
-						</div>
-						<div class="text-xs text-base-content/60 mt-2">
-							Créé le ${new Date(svg.created).toLocaleDateString('fr-FR')}
-						</div>
-						<div class="card-actions justify-end mt-2">
-							<span class="badge badge-outline">Voir détails</span>
-						</div>
-					</div>
-				</a>
-			`).join('');
-		}
-		
-		function showError(message) {
-			const grid = document.getElementById('svg-grid');
-			grid.innerHTML = `
-				<div class="col-span-full text-center py-12">
-					<p class="text-lg text-error">${message}</p>
-					<button class="btn btn-outline mt-4" onclick="loadSavedSVGs()">Réessayer</button>
-				</div>
-			`;
-		}
-	</script>
 </Layout>

@@ -1,18 +1,47 @@
 ---
 import Layout from "../layouts/Layout.astro";
+import { ui } from "../i18n/ui";
+
+const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
 ---
 <Layout>
-    <div class="card w-full max-w-md shadow-xl bg-base-100">
-        <div class="card-body">
-            <h1 class="card-title text-3xl mb-4 justify-center">Connexion</h1>
-            <!-- Formulaire de connexion -->
-            <form id="login-form" class="flex flex-col gap-4">
-                <input type="email" name="email" placeholder="Email" required class="input input-bordered" />
-                <input type="password" name="password" placeholder="Mot de passe" required class="input input-bordered" />
-                <button type="submit" class="btn btn-primary w-full">Se connecter</button>
-            </form>
-            <!-- Zone d'affichage du statut -->
-            <p id="status" class="mt-4 text-center text-error"></p>
+    <div class="flex items-center justify-center min-h-screen">
+        <div class="card w-full max-w-md shadow-xl bg-base-100">
+            <div class="card-body">
+                <h1 class="card-title text-3xl mb-4 justify-center">{ui[locale].login.title}</h1>
+                <!-- Formulaire de connexion -->
+                <form id="login-form" class="flex flex-col gap-4">
+                    <input 
+                        type="email" 
+                        name="email" 
+                        placeholder={ui[locale].login.email}
+                        required 
+                        class="input input-bordered" 
+                    />
+                    <input 
+                        type="password" 
+                        name="password" 
+                        placeholder={ui[locale].login.password}
+                        required 
+                        class="input input-bordered" 
+                    />
+                    <button type="submit" class="btn btn-primary w-full">
+                        {ui[locale].login.submit}
+                    </button>
+                </form>
+                <!-- Zone d'affichage du statut -->
+                <p id="status" class="mt-4 text-center"></p>
+                
+                <!-- Lien vers la page d'inscription -->
+                <div class="text-center mt-4">
+                    <p class="text-sm">
+                        {ui[locale].login.noAccount}
+                        <a href="/signup" class="link link-primary ml-1">
+                            {ui[locale].login.signupLink}
+                        </a>
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </Layout>

@@ -3,6 +3,7 @@
  */
 export const Collections = {
   Svg: "svg",
+  Users: "users",
   // Vous pouvez ajouter d'autres collections ici au fur et à mesure
 };
 

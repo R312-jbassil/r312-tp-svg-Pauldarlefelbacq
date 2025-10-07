@@ -25,15 +25,39 @@ en: {
     gallery: {
         title: 'SVG Gallery',
         viewDetails: 'View Details',
-        generatebutton:"Generate",
-
-        
+        generatebutton: 'Generate',
+        noSVG: 'No saved SVG',
+        createSVG: 'Create SVG',
+        createdOn: 'Created on',
     },
     id:{
         chaterror:'No chat history',
         chathistory: 'Chat history',
         enterprompt: 'Enter a prompt to edit the SVG',
         edit: 'Edit',
+    },
+    login: {
+        title: 'Login',
+        email: 'Email',
+        password: 'Password',
+        submit: 'Login',
+        success: '✅ Login successful!',
+        error: '❌ Invalid email or password',
+        noAccount: "Don't have an account?",
+        signupLink: 'Sign up',
+    },
+    signup: {
+        title: 'Sign Up',
+        email: 'Email',
+        password: 'Password',
+        confirmPassword: 'Confirm password',
+        username: 'Username (optional)',
+        submit: 'Create account',
+        success: '✅ Account created successfully!',
+        error: '❌ Error creating account',
+        passwordMismatch: '❌ Passwords do not match',
+        hasAccount: 'Already have an account?',
+        loginLink: 'Login',
     }
   },
   fr: {
@@ -62,13 +86,39 @@ en: {
     gallery: {
         title: 'Galerie SVG',
         viewDetails: 'Voir les détails',
-        generatebutton:"Générer",
+        generatebutton: 'Générer',
+        noSVG: 'Aucun SVG sauvegardé',
+        createSVG: 'Créer un SVG',
+        createdOn: 'Créé le',
     },
     id:{
         chaterror:'Aucun historique de chat.',
         chathistory: 'Historique de chat',
         enterprompt: 'Entrer un prompt pour éditer le svg',
         edit: 'Editer',
+    },
+    login: {
+        title: 'Connexion',
+        email: 'Email',
+        password: 'Mot de passe',
+        submit: 'Se connecter',
+        success: '✅ Connexion réussie !',
+        error: '❌ Email ou mot de passe invalide',
+        noAccount: "Vous n'avez pas de compte ?",
+        signupLink: "S'inscrire",
+    },
+    signup: {
+        title: 'Inscription',
+        email: 'Email',
+        password: 'Mot de passe',
+        confirmPassword: 'Confirmer le mot de passe',
+        username: 'Nom d\'utilisateur (optionnel)',
+        submit: 'Créer un compte',
+        success: '✅ Compte créé avec succès !',
+        error: '❌ Erreur lors de la création du compte',
+        passwordMismatch: '❌ Les mots de passe ne correspondent pas',
+        hasAccount: 'Vous avez déjà un compte ?',
+        loginLink: 'Se connecter',
     }
   },
 }
