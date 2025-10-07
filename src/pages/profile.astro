@@ -4,6 +4,7 @@ import { ui } from "../i18n/ui";
 
 const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
 const user = Astro.locals.user;
+const POCKETBASE_URL = import.meta.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 
 // Redirect if not authenticated
 if (!user) {
@@ -26,7 +27,7 @@ if (!user) {
                                 {user.avatar ? (
                                     <img 
                                         id="avatar-preview" 
-                                        src={`${import.meta.env.POCKETBASE_URL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`} 
+                                        src={`${POCKETBASE_URL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`} 
                                         alt="Profile" 
                                     />
                                 ) : (

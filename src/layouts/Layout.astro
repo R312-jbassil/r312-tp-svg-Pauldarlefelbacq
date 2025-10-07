@@ -4,8 +4,10 @@ import {ui}  from "../i18n/ui.js";
 
 const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
 const user = Astro.locals.user;
+const POCKETBASE_URL = import.meta.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 console.log('Locale in layout:', locale);
 console.log('User in layout:', user);
+console.log('PocketBase URL:', POCKETBASE_URL);
 ---
 <!doctype html>
 <html lang="en" data-theme="light" class="h-full">
@@ -55,7 +57,7 @@ console.log('User in layout:', user);
 									<label tabindex="0" class="btn btn-ghost btn-circle avatar">
 										<div class="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
 											{user.avatar ? (
-												<img src={`${import.meta.env.POCKETBASE_URL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`} alt="Profile" />
+												<img src={`${POCKETBASE_URL}/api/files/_pb_users_auth_/${user.id}/${user.avatar}`} alt="Profile" />
 											) : (
 												<div class="bg-neutral text-neutral-content flex items-center justify-center w-full h-full">
 													<span class="text-xl">{user.name?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'}</span>
