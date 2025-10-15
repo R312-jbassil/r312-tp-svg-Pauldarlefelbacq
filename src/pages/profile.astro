@@ -6,7 +6,6 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
 const user = Astro.locals.user;
 const POCKETBASE_URL = import.meta.env.POCKETBASE_URL || 'http://127.0.0.1:8090';
 
-// Redirect if not authenticated
 if (!user) {
     return Astro.redirect('/login');
 }
@@ -17,11 +16,9 @@ if (!user) {
         <h1 class="text-3xl font-bold mb-8">{ui[locale].profile.title}</h1>
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Profile Info Card -->
             <div class="lg:col-span-1">
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body items-center text-center">
-                        <!-- Avatar Display -->
                         <div class="avatar mb-4">
                             <div class="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                                 {user.avatar ? (
@@ -50,9 +47,7 @@ if (!user) {
                 </div>
             </div>
             
-            <!-- Profile Details/Edit Form -->
             <div class="lg:col-span-2">
-                <!-- View Mode -->
                 <div id="view-mode" class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <h3 class="card-title mb-4">Profile Information</h3>
@@ -82,7 +77,6 @@ if (!user) {
                     </div>
                 </div>
                 
-                <!-- Edit Mode -->
                 <div id="edit-mode" class="card bg-base-100 shadow-xl hidden">
                     <div class="card-body">
                         <h3 class="card-title mb-4">{ui[locale].profile.editProfile}</h3>
@@ -190,7 +184,7 @@ if (!user) {
         const avatarInput = document.getElementById('avatar-input');
         const avatarPreview = document.getElementById('avatar-preview');
         
-        // Toggle edit mode
+
         editModeBtn?.addEventListener('click', () => {
             viewMode?.classList.add('hidden');
             editMode?.classList.remove('hidden');
@@ -203,7 +197,7 @@ if (!user) {
             status.textContent = '';
         });
         
-        // Preview avatar before upload
+
         avatarInput?.addEventListener('change', (e) => {
             const file = e.target.files?.[0];
             if (file && avatarPreview) {
@@ -215,7 +209,7 @@ if (!user) {
             }
         });
         
-        // Handle form submission
+
         profileForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             status.className = 'text-center';
@@ -225,7 +219,7 @@ if (!user) {
             const password = formData.get('password');
             const passwordConfirm = formData.get('passwordConfirm');
             
-            // Validate passwords match if trying to change
+
             if (password || passwordConfirm) {
                 if (password !== passwordConfirm) {
                     status.className = 'text-center text-error';
@@ -234,7 +228,7 @@ if (!user) {
                 }
             }
             
-            // Send update request
+
             try {
                 const res = await fetch('/api/updateProfile', {
                     method: 'POST',
@@ -247,7 +241,7 @@ if (!user) {
                     status.className = 'text-center text-success';
                     status.textContent = '✅ Profile updated successfully!';
                     
-                    // Refresh page after a delay to show updated info
+
                     setTimeout(() => {
                         window.location.reload();
                     }, 1500);

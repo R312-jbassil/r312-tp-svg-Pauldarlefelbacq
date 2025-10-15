@@ -10,7 +10,6 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
             <div class="card-body">
                 <h1 class="card-title text-3xl mb-4 justify-center">{ui[locale].signup.title}</h1>
                 
-                <!-- Formulaire d'inscription -->
                 <form id="signup-form" class="flex flex-col gap-4">
                     <input 
                         type="text" 
@@ -50,10 +49,8 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
                     </button>
                 </form>
                 
-                <!-- Zone d'affichage du statut -->
                 <p id="status" class="mt-4 text-center"></p>
                 
-                <!-- Lien vers la page de connexion -->
                 <div class="text-center mt-4">
                     <p class="text-sm">
                         {ui[locale].signup.hasAccount}
@@ -72,7 +69,6 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
     const form = document.getElementById("signup-form");
     const status = document.getElementById("status");
 
-    // Gestion de la soumission du formulaire
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
         status.className = "mt-4 text-center";
@@ -82,24 +78,20 @@ const locale = Astro.locals.lang as 'en' | 'fr' ?? 'en';
         const password = formData.get("password");
         const passwordConfirm = formData.get("passwordConfirm");
 
-        // Vérification que les mots de passe correspondent
         if (password !== passwordConfirm) {
             status.className = "mt-4 text-center text-error";
             status.textContent = "❌ Les mots de passe ne correspondent pas";
             return;
         }
 
-        // Envoi des informations au serveur via l'API /api/signup
         const res = await fetch("/api/signup", {
             method: "POST",
             body: formData, // Envoi du FormData directement (pas de JSON)
         });
 
-        // Traitement de la réponse
         if (res.ok) {
             status.className = "mt-4 text-center text-success";
             status.textContent = "✅ Compte créé avec succès !";
-            // Redirection vers la page de connexion après un court délai
             setTimeout(() => {
                 window.location.href = "/login";
             }, 1500);

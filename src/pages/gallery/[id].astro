@@ -12,7 +12,6 @@ if (!id) {
 }
 const svg: SvgRecord = await pb.collection(Collections.Svg).getOne(id);
 
-// Parse chat_history si c'est une string JSON
 let chatHistory = [];
 if (svg.chat_history) {
     try {
@@ -24,7 +23,6 @@ if (svg.chat_history) {
 ---
 <Layout>
     <div class="container mx-auto p-6 max-w-7xl">
-        <!-- Breadcrumb de navigation -->
         <div class="text-sm breadcrumbs mb-6">
             <ul>
                 <li><a href="/" class="text-primary hover:text-primary-focus">{ui[locale].nav.home}</a></li>
@@ -34,7 +32,6 @@ if (svg.chat_history) {
         </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-screen">
-            <!-- Section SVG -->
             <div class="flex flex-col">
                 <h2 class="text-xl font-bold mb-4">{svg.nom}</h2>
                 <div class="border border-base-300 rounded-lg p-4 flex items-center justify-center bg-base-50 flex-grow">
@@ -46,7 +43,6 @@ if (svg.chat_history) {
 
             <div class="divider lg:divider-horizontal"></div>
 
-            <!-- Section Chat -->
             <div class="flex flex-col h-full relative">
                 <h2 class="text-xl font-bold mb-4">{ui[locale].id.chathistory}</h2>
 
@@ -67,7 +63,6 @@ if (svg.chat_history) {
                     }
                 </div>
 
-                <!-- Formulaire de chat -->
                 <form id="input-prompt-form" class="flex flex-col gap-2 w-full absolute bottom-0 left-0 right-0 bg-base-300 p-4" method="POST" autocomplete="off">
                     <input type="hidden" name="history" id="history-input" value={JSON.stringify(chatHistory)} />
                     <input type="hidden" name="id" value={svg.id} />
@@ -90,7 +85,6 @@ if (svg.chat_history) {
         
         let currentHistory = JSON.parse(historyInput.value || '[]');
 
-        // Fonction pour générer le SVG
         async function generateSVG(messages) {
             try {
                 const response = await fetch('/api/generateSVG', {
@@ -109,7 +103,6 @@ if (svg.chat_history) {
             }
         }
 
-        // Fonction pour mettre à jour les données
         async function update(updatedData) {
             const response = await fetch("/api/updateSVG", {
                 method: "POST",
@@ -119,7 +112,6 @@ if (svg.chat_history) {
             return response;
         }
 
-        // Fonction pour ajouter un message au chat
         function addChatMessage(role, content) {
             const messageDiv = document.createElement('div');
             messageDiv.className = `chat ${role === 'user' ? 'chat-start' : 'chat-end'}`;
@@ -133,7 +125,6 @@ if (svg.chat_history) {
             chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
         }
 
-        // Écouteur d'événement pour le formulaire
         chatForm?.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -143,17 +134,13 @@ if (svg.chat_history) {
             
             if (!promptText) return;
 
-            // Ajouter le message utilisateur à l'historique
             const userMessage = { role: 'user', content: promptText };
             currentHistory.push(userMessage);
             
-            // Afficher le message utilisateur
             addChatMessage('user', promptText);
             
-            // Réinitialiser le champ
             promptInput.value = '';
             
-            // Afficher un indicateur de chargement
             const loadingDiv = document.createElement('div');
             loadingDiv.className = 'chat chat-end';
             loadingDiv.innerHTML = `
@@ -165,26 +152,20 @@ if (svg.chat_history) {
             chatHistoryDiv.scrollTop = chatHistoryDiv.scrollHeight;
 
             try {
-                // Générer la réponse IA
                 const aiResponse = await generateSVG(currentHistory);
                 
-                // Supprimer l'indicateur de chargement
                 loadingDiv.remove();
                 
-                // Ajouter la réponse IA à l'historique
                 const assistantMessage = { role: 'assistant', content: aiResponse };
                 currentHistory.push(assistantMessage);
                 
-                // Afficher la réponse IA
                 addChatMessage('assistant', aiResponse);
                 
-                // Extraire et mettre à jour le SVG
                 const svgMatch = aiResponse.match(/<svg[\s\S]*?<\/svg>/i);
                 if (svgMatch && svgContainer) {
                     const newSvgCode = svgMatch[0];
                     svgContainer.innerHTML = newSvgCode;
                     
-                    // Sauvegarder les modifications
                     const response = await update({
                         id: svgId,
                         code: newSvgCode,
@@ -200,11 +181,9 @@ if (svg.chat_history) {
                     }
                 }
                 
-                // Mettre à jour l'input caché
                 historyInput.value = JSON.stringify(currentHistory);
                 
             } catch (error) {
-                // Supprimer l'indicateur de chargement en cas d'erreur
                 loadingDiv.remove();
                 addChatMessage('assistant', 'Erreur lors de la génération du SVG');
             }

@@ -1,4 +1,4 @@
-import pb from '../utils/pb.js';
+import pb from '../utils/pb';
 
 export const onRequest = async (context, next) => {
   const cookie = context.cookies.get("pb_auth")?.value;
